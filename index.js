@@ -1,5 +1,7 @@
 'use strict';
 var pegleg = {};
+
+// TODO change to `prefix`
 var match;
 
 pegleg.match = match = function (peg, string) {
@@ -21,7 +23,18 @@ pegleg.match = match = function (peg, string) {
       }
     }
   case "neg":
+    result = match(peg.right, string);
+
+    if( result === false ){
+      console.log( "returning string" );
+      return string;
+    } else {
+      console.log( "resturning false" );
+      return false;
+    }
   case "non-term":
+    // TODO requires attaching a ref to non-terminals map
+    // to every subterm object in the data structure
     match(peg.nonTerminals[peg.id], string);
   case "term":
     if(string[0] === peg.char){
@@ -30,7 +43,13 @@ pegleg.match = match = function (peg, string) {
       return false;
     }
   case "opt":
-    return match(peg.left) || match(peg.right);
+    result1 = match(peg.left, string);
+
+    if( result1 === false ) {
+      return match(peg.right, string);
+    } else {
+      return result1;
+    }
   case "seq":
     result = match(peg.left, string);
 
