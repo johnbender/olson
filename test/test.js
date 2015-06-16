@@ -16,13 +16,13 @@ describe('pegleg node module', function () {
   };
 
   it("sequence `ab` matches string `ab`", function () {
-    var result = pegleg.match(aAndB, "ab");
+    var result = pegleg.prefix(aAndB, "ab");
 
     assert(result === "", "should match simple sequence");
   });
 
   it("sequence `ab` does not match `aa`", function () {
-    var result = pegleg.match(aAndB, "ab");
+    var result = pegleg.prefix(aAndB, "ab");
 
     assert(!result, "should not match simple sequence");
   });
@@ -36,13 +36,13 @@ describe('pegleg node module', function () {
   };
 
   it("`aaa` matches `a*`", function () {
-    var result = pegleg.match(aStar, "aaa");
+    var result = pegleg.prefix(aStar, "aaa");
 
     assert(result === "", "should match simple many `a`s");
   });
 
   it("`b` matches `a*`", function () {
-    var result = pegleg.match(aStar, "b");
+    var result = pegleg.prefix(aStar, "b");
 
     assert(result, "should match simple `b` since it accepts empty string");
   });
@@ -60,19 +60,19 @@ describe('pegleg node module', function () {
   };
 
   it("options `a / b` matches `a`", function () {
-    var result = pegleg.match(aOrB, "a");
+    var result = pegleg.prefix(aOrB, "a");
 
     assert(result === "", "should match`a`");
   });
 
   it("options `a / b` matches `b`", function () {
-    var result = pegleg.match(aOrB, "b");
+    var result = pegleg.prefix(aOrB, "b");
 
     assert(result === "", "should match `b`");
   });
 
   it("options `a / b` does not match `c`", function () {
-    var result = pegleg.match(aOrB, "c");
+    var result = pegleg.prefix(aOrB, "c");
 
     assert(result === false, "shouldn't match `c`");
   });
@@ -86,13 +86,13 @@ describe('pegleg node module', function () {
   };
 
   it("`b` matches `!a`", function () {
-    var result = pegleg.match(notA, "b");
+    var result = pegleg.prefix(notA, "b");
 
     assert(result === "b", "should match `b` but not consume `b`");
   });
 
   it("`a` does not match `!a`", function () {
-    var result = pegleg.match(notA, "a");
+    var result = pegleg.prefix(notA, "a");
 
     assert(result === false, "should not match `a`");
   });

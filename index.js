@@ -1,20 +1,18 @@
 'use strict';
 var pegleg = {};
 
-// TODO change to `prefix`
-var match;
-
-pegleg.match = match = function (peg, string) {
+// TODO change to `prefix` or `consume`
+var prefix = pegleg.prefix = function (peg, string) {
   var result1, result2, result;
 
   switch (peg.name) {
   case "star":
-    result1 = match(peg.left, string);
+    result1 = prefix(peg.left, string);
 
     if( result1 === false ){
       return string;
     } else {
-      result2 = match(peg, result1);
+      result2 = prefix(peg, result1);
 
       if(result2 === false){
         return result1;
@@ -23,7 +21,7 @@ pegleg.match = match = function (peg, string) {
       }
     }
   case "neg":
-    result = match(peg.right, string);
+    result = prefix(peg.right, string);
 
     if( result === false ){
       return string;
@@ -33,7 +31,7 @@ pegleg.match = match = function (peg, string) {
   case "non-term":
     // TODO requires attaching a ref to non-terminals map
     // to every subterm object in the data structure
-    match(peg.nonTerminals[peg.id], string);
+    prefix(peg.nonTerminals[peg.id], string);
   case "term":
     if(string[0] === peg.char){
       return string.slice(1);
@@ -41,21 +39,21 @@ pegleg.match = match = function (peg, string) {
       return false;
     }
   case "opt":
-    result1 = match(peg.left, string);
+    result1 = prefix(peg.left, string);
 
     if( result1 === false ) {
-      return match(peg.right, string);
+      return prefix(peg.right, string);
     } else {
       return result1;
     }
   case "seq":
-    result = match(peg.left, string);
+    result = prefix(peg.left, string);
 
     if( result === false ){
       return result;
     }
 
-    return  match(peg.right, result);
+    return  prefix(peg.right, result);
   }
 };
 
