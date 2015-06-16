@@ -26,10 +26,8 @@ pegleg.match = match = function (peg, string) {
     result = match(peg.right, string);
 
     if( result === false ){
-      console.log( "returning string" );
       return string;
     } else {
-      console.log( "resturning false" );
       return false;
     }
   case "non-term":
