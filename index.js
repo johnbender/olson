@@ -20,6 +20,8 @@ var prefix = olson.prefix = function (peg, string) {
         return result2;
       }
     }
+
+    break;
   case "neg":
     result = prefix(peg.right, string);
 
@@ -28,16 +30,22 @@ var prefix = olson.prefix = function (peg, string) {
     } else {
       return false;
     }
+
+    break;
   case "non-term":
     // TODO requires attaching a ref to non-terminals map
     // to every subterm object in the data structure
     prefix(peg.nonTerminals[peg.id], string);
+
+    break;
   case "term":
     if(string[0] === peg.char){
       return string.slice(1);
     } else {
       return false;
     }
+
+    break;
   case "opt":
     result1 = prefix(peg.left, string);
 
@@ -46,6 +54,8 @@ var prefix = olson.prefix = function (peg, string) {
     } else {
       return result1;
     }
+
+    break;
   case "seq":
     result = prefix(peg.left, string);
 
