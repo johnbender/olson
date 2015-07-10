@@ -1,8 +1,8 @@
 'use strict';
-var pegleg = {};
+var olson = {};
 
 // TODO change to `prefix` or `consume`
-var prefix = pegleg.prefix = function (peg, string) {
+var prefix = olson.prefix = function (peg, string) {
   var result1, result2, result;
 
   switch (peg.name) {
@@ -57,4 +57,4 @@ var prefix = pegleg.prefix = function (peg, string) {
   }
 };
 
-module.exports = pegleg;
+module.exports = olson;

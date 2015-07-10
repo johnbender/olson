@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 'use strict';
 var meow = require('meow');
-var pegleg = require('./');
+var olson = require('./');
 
 var cli = meow({
   help: [
     'Usage',
-    '  pegleg <input>',
+    '  olson <input>',
     '',
     'Example',
-    '  pegleg Unicorn'
+    '  olson Unicorn'
   ].join('\n')
 });
 
-pegleg(cli.input[0]);
+olson(cli.input[0]);

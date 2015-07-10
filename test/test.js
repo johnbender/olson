@@ -1,8 +1,8 @@
 'use strict';
 var assert = require('assert');
-var pegleg = require('../');
+var olson = require('../');
 
-describe('pegleg node module', function () {
+describe('olson node module', function () {
   var aAndB = {
     name: 'seq',
     left: {
@@ -16,13 +16,13 @@ describe('pegleg node module', function () {
   };
 
   it("sequence `ab` matches string `ab`", function () {
-    var result = pegleg.prefix(aAndB, "ab");
+    var result = olson.prefix(aAndB, "ab");
 
     assert(result === "", "should match simple sequence");
   });
 
   it("sequence `ab` does not match `aa`", function () {
-    var result = pegleg.prefix(aAndB, "ab");
+    var result = olson.prefix(aAndB, "ab");
 
     assert(!result, "should not match simple sequence");
   });
@@ -36,13 +36,13 @@ describe('pegleg node module', function () {
   };
 
   it("`aaa` matches `a*`", function () {
-    var result = pegleg.prefix(aStar, "aaa");
+    var result = olson.prefix(aStar, "aaa");
 
     assert(result === "", "should match simple many `a`s");
   });
 
   it("`b` matches `a*`", function () {
-    var result = pegleg.prefix(aStar, "b");
+    var result = olson.prefix(aStar, "b");
 
     assert(result, "should match simple `b` since it accepts empty string");
   });
@@ -60,19 +60,19 @@ describe('pegleg node module', function () {
   };
 
   it("options `a / b` matches `a`", function () {
-    var result = pegleg.prefix(aOrB, "a");
+    var result = olson.prefix(aOrB, "a");
 
     assert(result === "", "should match`a`");
   });
 
   it("options `a / b` matches `b`", function () {
-    var result = pegleg.prefix(aOrB, "b");
+    var result = olson.prefix(aOrB, "b");
 
     assert(result === "", "should match `b`");
   });
 
   it("options `a / b` does not match `c`", function () {
-    var result = pegleg.prefix(aOrB, "c");
+    var result = olson.prefix(aOrB, "c");
 
     assert(result === false, "shouldn't match `c`");
   });
@@ -86,13 +86,13 @@ describe('pegleg node module', function () {
   };
 
   it("`b` matches `!a`", function () {
-    var result = pegleg.prefix(notA, "b");
+    var result = olson.prefix(notA, "b");
 
     assert(result === "b", "should match `b` but not consume `b`");
   });
 
   it("`a` does not match `!a`", function () {
-    var result = pegleg.prefix(notA, "a");
+    var result = olson.prefix(notA, "a");
 
     assert(result === false, "should not match `a`");
   });

@@ -1,5 +1,5 @@
 {
-  "name": "pegleg",
+  "name": "olson",
   "version": "0.0.0",
   "description": "A tiny recognizer for parsring expression grammars.",
   "author": {
@@ -7,14 +7,14 @@
     "email": "john.m.bender@gmail.com",
     "url": "johnbender.us"
   },
-  "repository": "johnbender/pegleg",
+  "repository": "johnbender/olson",
   "license": "MIT",
   "files": [
     "index.js",
     "cli.js"
   ],
   "keywords": [
-    "pegleg",
+    "olson",
     "parsing",
     "expression",
     "grammars",
@@ -37,6 +37,6 @@
     "test": "grunt"
   },
   "bin": {
-    "pegleg": "cli.js"
+    "olson": "cli.js"
   }
 }

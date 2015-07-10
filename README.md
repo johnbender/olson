@@ -1,26 +1,26 @@
-#  [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
+# Olson
 
-> A tiny recognizer for parsring expression grammars.
+A tiny recognizer for parsring expression grammars.
 
 
 ## Install
 
 ```sh
-$ npm install --save pegleg
+$ npm install --save olson
 ```
 
 
 ## Usage
 
 ```js
-var pegleg = require('pegleg');
+var olson = require('olson');
 
-pegleg('Rainbow');
+olson('Rainbow');
 ```
 
 ```sh
-$ npm install --global pegleg
-$ pegleg --help
+$ npm install --global olson
+$ olson --help
 ```
 
 
@@ -29,9 +29,7 @@ $ pegleg --help
 MIT © [John Bender](johnbender.us)
 
 
-[npm-image]: https://badge.fury.io/js/pegleg.svg
-[npm-url]: https://npmjs.org/package/pegleg
-[travis-image]: https://travis-ci.org/johnbender/pegleg.svg?branch=master
-[travis-url]: https://travis-ci.org/johnbender/pegleg
-[daviddm-image]: https://david-dm.org/johnbender/pegleg.svg?theme=shields.io
-[daviddm-url]: https://david-dm.org/johnbender/pegleg
+[npm-image]: https://badge.fury.io/js/olson.svg
+[npm-url]: https://npmjs.org/package/olson
+[travis-image]: https://travis-ci.org/johnbender/olson.svg?branch=master
+[travis-url]: https://travis-ci.org/johnbender/olson
