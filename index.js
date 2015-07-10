@@ -1,4 +1,7 @@
 'use strict';
+
+require('./src/compile.js' );
+
 var olson = {};
 
 // TODO change to `prefix` or `consume`
