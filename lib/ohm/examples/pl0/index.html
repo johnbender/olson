@@ -1,0 +1,260 @@
+<!doctype html>
+<!--
+
+  TODO:
+  * Add comments to make this code more understandable.
+  * Move createExpectedElement and showError to a .js file,
+    and use it from here and from math.html.
+  * Break up math.css into two files, one of which will be
+    used here.
+  * Change the "value" label the the UI to say "code".
+  * Break up the output so that each instruction shows up
+    in its own line.
+
+-->
+<html>
+  <head>
+    <title>ohm/PL/0 demo</title>
+    <meta charset=utf-8>
+    <link href="../math/math.css" rel="stylesheet">
+    <script src="../lib.js"></script>
+    <script type="text/ohm-js">
+
+PL0 {
+
+  Start 
+    = Seq
+
+  Seq
+    = Stmt Seq  -- seq
+    | Stmt      -- base
+
+  Stmt
+    = var ident "=" Expr ";"       -- var
+    | print AddExpr ";"            -- print
+    | if Expr then Stmt else Stmt  -- if3
+    | if Expr then Stmt            -- if2
+    | ident ":=" Expr ";"          -- assign
+
+  Expr
+    = AddExpr
+
+  AddExpr
+    = AddExpr "+" MulExpr  -- plus
+    | AddExpr "-" MulExpr  -- minus
+    | MulExpr
+
+  MulExpr
+    = MulExpr "*" PriExpr  -- times
+    | MulExpr "/" PriExpr  -- divide
+    | PriExpr
+
+  PriExpr
+    = "(" Expr ")"  -- paren
+    | "+" PriExpr   -- pos
+    | "-" PriExpr   -- neg
+    | number
+    | ident
+
+  number  (a number literal)
+    = digit* "." digit+  -- fract
+    | digit+             -- whole
+
+  ident  (an identifier)
+    = ~keyword letter alnum*
+
+  var   = "var" ~alnum
+  print = "print" ~alnum
+  if    = "if" ~alnum
+  then  = "then" ~alnum
+  else  = "else" ~alnum
+
+  keyword = var | print | if | then | else
+  
+}
+
+    </script>
+    <script src="../../dist/ohm.js"></script>
+  </head>
+  <body>
+    <input type="text" id="input" placeholder="Enter a PL/0 expression..." size="80"></input>
+    <div id="errorDiv">
+      <div id="spaces"></div>
+      <wrapperWrapper><wrapper>
+        <div id="error"><label>Expected: </label><span id="errorDetails"></span></div>
+      </wrapper></wrapperWrapper>
+    </div>
+    <div id="value"></div>
+    <script>
+
+var g = ohm.grammarFromScriptElement();
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+var symbolTableIn = g.inheritedAttribute({
+  _base: function(s) {
+    symbolTableIn.set([]);
+  },
+  _default: function(child) {
+    if (child === this.firstChild()) {
+      symbolTableIn.set(symbolTableIn(this));
+    } else {
+      symbolTableIn.set(symbolTableOut(this.childBefore(child)));
+    }
+  }
+});
+
+var symbolTableOut = g.synthesizedAttribute({
+  Start: function(q) {
+    return symbolTableOut(q);
+  },
+  Stmt_var: function(_, n, _, e, _) {
+    return [].concat(symbolTableIn(this)).concat([n.interval.contents]);
+  },
+  _default: function() {
+    return this.hasNoChildren() ? symbolTableIn(this) : symbolTableOut(this.lastChild());
+  },
+  _terminal: function() {
+    return symbolTableIn(this);
+  }
+});
+
+var codeOut = g.synthesizedAttribute({
+  Start: function(q) {
+    return codeOut(q);
+  },
+  Seq_seq: function(s, q) {
+    return [].concat(codeOut(s)).concat(['pop']).concat(codeOut(q));
+  },
+  Seq_base: function(s) {
+    return codeOut(s);
+  },
+  Stmt_var: function(_, n, _, e, _) {
+    return [].concat(codeOut(e))
+             .concat(['pushLit(' + symbolTableOut(this).indexOf(n.interval.contents) + ')', 'store']);
+  },
+  Stmt_print: function(_, e, _) {
+    return [].concat(codeOut(e)).concat(['print']);
+  },
+  Stmt_assign: function(n, _, e, _) {
+    return [].concat(codeOut(e))
+             .concat(['pushLit(' + symbolTableOut(this).indexOf(n.interval.contents) + ')', 'store']);
+  },
+  Stmt_if3: function(_, c, _, t, _, f) {
+    var tCode = codeOut(t);
+    var fCode = codeOut(f);
+    return [].concat(codeOut(c))
+             .concat(['jmp0(' + (tCode.length + 1) + ')'])
+             .concat(tCode)
+             .concat(['jmp(' + fCode.length + ')'])
+             .concat(fCode);
+  },
+
+  Stmt_if2: function(_, c, _, t) {
+    var tCode = codeOut(t);
+    return [].concat(codeOut(c))
+             .concat(['jmp0(' + tCode.length + ')'])
+             .concat(tCode);
+  },
+  AddExpr_plus: function(x, _, y) {
+    return [].concat(codeOut(x)).concat(codeOut(y)).concat(['add']);
+  },
+  AddExpr_minus: function(x, _, y) {
+    return [].concat(codeOut(x)).concat(codeOut(y)).concat(['sub']);
+  },
+  MulExpr_times: function(x, _, y) {
+    return [].concat(codeOut(x)).concat(codeOut(y)).concat(['mul']);
+  },
+  MulExpr_divide: function(x, _, y) {
+    return [].concat(codeOut(x)).concat(codeOut(y)).concat(['div']);
+  },
+  PriExpr_paren: function(_, e, _) {
+    return codeOut(e);
+  },
+  PriExpr_pos: function(_, e) {
+    return codeOut(e);
+  },
+  PriExpr_neg: function(_, e) {
+    return [].concat([codeOut(e)]).concat(['neg']);
+  },
+  ident: function(_, _) {
+    return ['pushReg(' + symbolTableOut(this).indexOf(this.interval.contents) + ')'];
+  },
+  number: function(_) {
+    return ['pushLit(' + parseFloat(this.interval.contents) + ')'];
+  },
+  _default: ohm.actions.passThrough
+});
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+var input = document.getElementById('input');
+var spaces = document.getElementById('spaces');
+var error = document.getElementById('error');
+var errorDetails = document.getElementById('errorDetails');
+var errorDiv = document.getElementById('errorDiv');
+
+input.value = '';
+hideError();
+
+input.oninput = function() {
+  hideError();
+  var m = g.match(this.value);
+  if (m.failed()) {
+    this.className = 'error';
+    showError(m);
+  } else {
+    show('value', codeOut(m).join('\n'));
+  }
+};
+
+function hideError() {
+  errorDiv.className = errorDiv.className = 'hidden';
+}
+
+function showError(failure) {
+  setTimeout(function() {
+    // Position the error bubble to line up with the offending input
+    spaces.innerHTML = repeat(' ', failure.getPos());
+
+    // Set up the details, i.e., what input was expected at that position
+    removeChildren(errorDetails);
+    failure.getExpected().forEach(function(text, idx, expected) {
+      var element = createExpectedElement(text);
+      if (idx > 0) {
+        errorDetails.appendChild(makeElement('light', idx === expected.length - 1 ? ', or ' : ', '));
+      }
+      errorDetails.appendChild(element);
+    });
+
+    // Show error
+    errorDiv.className = 'visible';
+  }, 0);
+}
+
+function createExpectedElement(s) {
+  if (s.charAt(0) === '"' && s.charAt(s.length - 1) === '"' ||
+      s.charAt(0) === "'" && s.charAt(s.length - 1) === "'") {
+    return makeElement('literal',
+      makeElement('light', '"'),
+      makeElement('code', s.substr(1, s.length - 2)),
+      makeElement('light', '"'));
+  } else {
+    return makeElement('description', s);
+  }
+}
+
+window.test = function(t) {
+  var valueField = document.querySelector('#value');
+
+  input.value = 'var x = 3; print x + 1;';
+  input.oninput();
+  var expected = 'pushLit(3) pushLit(0) store pop pushReg(0) pushLit(1) add print';
+  var actual = valueField.textContent.split(/\s+/).join(' ');
+  t.equal(actual, expected, 'simple program produces expected code');
+  t.end();
+};
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,68 @@
+{
+  "name": "ohm",
+  "version": "0.0.0",
+  "description": "an object-oriented language for parsing and pattern matching",
+  "keywords": [
+    "parser",
+    "compiler",
+    "pattern matching",
+    "pattern-matching",
+    "ometa",
+    "ometa/js",
+    "ometa-js",
+    "ometajs",
+    "rapid",
+    "prototyping"
+  ],
+  "homepage": "http://tinlizzie.org/ohm",
+  "bugs": "http://github.com/alexwarth/ohm/issues",
+  "main": "src/main.js",
+  "bin": "src/ohm-cmd.js",
+  "browserify": {
+    "options": "src/main.js --debug --standalone ohm -o dist/ohm.js"
+  },
+  "scripts": {
+    "prebootstrap": "npm test --silent && cp dist/ohm-grammar.js{,.old} && cp dist/built-in-rules.js{,.old}",
+    "bootstrap": "npm run unsafe-bootstrap && npm test --silent || (echo 'Bootstrap failed.'; mv -v dist/ohm-grammar.js{.old,}; mv -v dist/built-in-rules.js{.old,})",
+    "build": "npm run build-debug && uglifyjs dist/ohm.js > dist/ohm.min.js",
+    "prebuild-debug": "bin/update-env.sh",
+    "build-debug": "browserify $npm_package_browserify_options",
+    "clean": "rm -f dist/ohm.js dist/ohm.min.js",
+    "lint": "eslint --rulesdir eslint_rules . && jscs --preset=google .",
+    "pretest": "bin/update-env.sh",
+    "test": "tape test/*.js | tap-spec",
+    "test-watch": "watchy -w example,doc,src,test -- npm test",
+    "postinstall": "bin/dev-setup.sh; touch .install-timestamp",
+    "prepublish": "npm run lint && npm run build && npm run bootstrap",
+    "unsafe-bootstrap": "src/ohm-cmd.js src/ohm-grammar.ohm > dist/ohm-grammar.js.new && mv -f dist/ohm-grammar.js{.new,} && src/ohm-cmd.js src/built-in-rules.ohm > dist/built-in-rules.js.new && mv -f dist/built-in-rules.js{.new,}",
+    "visualizer": "npm run watch & bin/ohm-visualizer",
+    "watch": "watchify $npm_package_browserify_options -v"
+  },
+  "license": "MIT",
+  "author": "Alex Warth <alexwarth@gmail.com> (http://tinlizzie.org/~awarth)",
+  "contributors": [
+    "Patrick Dubroy <pdubroy@gmail.com>",
+    "Tony Garnock-Jones <tonygarnockjones@gmail.com>",
+    "Yoshiki Ohshima <Yoshiki.Ohshima@acm.org>"
+  ],
+  "dependencies": {
+    "util-extend": "^1.0.1",
+    "inherits": "^2.0.1",
+    "symbol": ""
+  },
+  "devDependencies": {
+    "browser-sync": "^2.4.0",
+    "browserify": "^3.30.4",
+    "eslint": "^0.17.1",
+    "eslint-plugin-no-extension-in-require": "^0.2.0",
+    "jscs": "^1.12.0",
+    "jsdom": "^3.1.2",
+    "markscript": "0.4.2",
+    "tap-spec": "^2.2.2",
+    "tape": "^3.5.0",
+    "tape-catch": "^1.0.4",
+    "uglify-js": "^2.4.12",
+    "watchify": "^0.6.1",
+    "watchy": "^0.6.1"
+  }
+}

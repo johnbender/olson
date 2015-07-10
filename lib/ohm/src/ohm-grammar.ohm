@@ -1,0 +1,114 @@
+Ohm {
+
+  Grammars
+    = Grammar*
+
+  Grammar
+    = ident SuperGrammar? "{" Rule* "}"
+
+  SuperGrammar
+    = "<:" ident
+
+  Rule
+    = ident Formals? ruleDescr? "="  Alt  -- define
+    | ident Formals?            ":=" Alt  -- override
+    | ident Formals?            "+=" Alt  -- extend
+
+  Formals
+    = "<" ListOf<ident, ","> ">"
+
+  Params
+    = "<" ListOf<Seq, ","> ">"
+
+  Alt
+    = Term ("|" Term)*
+
+  Term
+    = Seq caseName -- inline
+    | Seq
+
+  Seq
+    = Iter*
+
+  Iter
+    = Pred "*"  -- star
+    | Pred "+"  -- plus
+    | Pred "?"  -- opt
+    | Pred
+
+  Pred
+    = "~" Base  -- not
+    | "&" Base  -- lookahead
+    | Base
+
+  Base
+    = ident Params? ~(ruleDescr? "=" | ":=" | "+=")  -- application
+    | (keyword | string | regExp | number)           -- prim
+    | "(" Alt ")"                                    -- paren
+    | "[" Alt "]"                                    -- arr
+    | "``" Alt "''"                                  -- str
+    | "{" "..."? "}"                                 -- obj
+    | "{" Props ("," "...")? "}"                     -- objWithProps
+
+  Props
+    = Prop ("," Prop)*
+
+  Prop
+    = (name | string) ":" Alt
+
+  ruleDescr  (a rule description)
+    = "(" ruleDescrText ")"
+
+  ruleDescrText
+    = (~")" _)*
+
+  caseName
+    = "--" (~"\n" space)* name (~"\n" space)* ("\n" | &"}")
+
+  name  (a name)
+    = nameFirst nameRest*
+
+  nameFirst
+    = "_"
+    | letter
+
+  nameRest
+    = "_"
+    | alnum
+
+  ident  (an identifier)
+    = ~keyword name
+
+  keyword
+    = "undefined" ~nameRest  -- undefined
+    | "null" ~nameRest       -- null
+    | "true" ~nameRest       -- true
+    | "false" ~nameRest      -- false
+
+  string  (a string literal)
+    = "\"" strChar* "\""
+
+  strChar
+    = escapeChar
+    | ~"\"" ~"\n" _
+
+  escapeChar
+    = "\\x" hexDigit hexDigit                    -- hexEscape
+    | "\\u" hexDigit hexDigit hexDigit hexDigit  -- unicodeEscape
+    | "\\" _                                     -- escape
+
+  regExp  (a regular expression)
+    = "/" reCharClass "/"
+
+  reCharClass
+    = "\\p{" /[A-Za-z]/+ "}"    -- unicode
+    | "[" ("\\]" | ~"]" _)* "]" -- ordinary
+
+  number  (a number)
+    = "-"? digit+
+
+  space
+   += "//" (~"\n" _)* "\n"  -- singleLine
+    | "/*" (~"*/" _)* "*/"  -- multiLine
+
+}
