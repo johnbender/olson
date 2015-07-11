@@ -3,17 +3,54 @@ var assert = require('assert');
 var olson = require('../');
 
 describe('olson node module', function () {
-  var aAndB = {
-    name: 'seq',
-    left: {
-      name: 'term',
-      char: "a"
-    },
-    right: {
-      name: 'term',
-      char: "b"
-    }
-  };
+  var aAndB, aStar, aOrB, notA;
+
+  beforeEach(function() {
+    aAndB = {
+      name: 'seq',
+      exprs: [
+        {
+          name: 'term',
+          char: "a"
+        },
+        {
+          name: 'term',
+          char: "b"
+        }
+      ]
+    };
+
+    aStar = {
+      name: 'star',
+      expr: {
+        name: 'term',
+        char: "a"
+      }
+    };
+
+    aOrB = {
+      name: 'opt',
+      exprs: [
+        {
+          name: 'term',
+          char: "a"
+        },
+        {
+          name: 'term',
+          char: "b"
+        }
+      ]
+    };
+
+    notA = {
+      name: "neg",
+      expr: {
+        name: "term",
+        char: "a"
+      }
+    };
+
+  });
 
   it("sequence `ab` matches string `ab`", function () {
     var result = olson.prefix(aAndB, "ab");
@@ -22,18 +59,10 @@ describe('olson node module', function () {
   });
 
   it("sequence `ab` does not match `aa`", function () {
-    var result = olson.prefix(aAndB, "ab");
+    var result = olson.prefix(aAndB, "aa");
 
-    assert(!result, "should not match simple sequence");
+    assert(result === false, "should not match simple sequence");
   });
-
-  var aStar = {
-    name: 'star',
-    left: {
-      name: 'term',
-      char: "a"
-    }
-  };
 
   it("`aaa` matches `a*`", function () {
     var result = olson.prefix(aStar, "aaa");
@@ -46,18 +75,6 @@ describe('olson node module', function () {
 
     assert(result, "should match simple `b` since it accepts empty string");
   });
-
-  var aOrB = {
-    name: 'opt',
-    left: {
-      name: 'term',
-      char: "a"
-    },
-    right: {
-      name: 'term',
-      char: "b"
-    }
-  };
 
   it("options `a / b` matches `a`", function () {
     var result = olson.prefix(aOrB, "a");
@@ -76,14 +93,6 @@ describe('olson node module', function () {
 
     assert(result === false, "shouldn't match `c`");
   });
-
-  var notA = {
-    name: "neg",
-    right: {
-      name: "term",
-      char: "a"
-    }
-  };
 
   it("`b` matches `!a`", function () {
     var result = olson.prefix(notA, "b");

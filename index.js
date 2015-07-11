@@ -4,13 +4,12 @@ require('./src/compile.js' );
 
 var olson = {};
 
-// TODO change to `prefix` or `consume`
 var prefix = olson.prefix = function (peg, string) {
   var result1, result2, result;
 
   switch (peg.name) {
   case "star":
-    result1 = prefix(peg.left, string);
+    result1 = prefix(peg.expr, string);
 
     if( result1 === false ){
       return string;
@@ -26,9 +25,19 @@ var prefix = olson.prefix = function (peg, string) {
 
     break;
   case "neg":
-    result = prefix(peg.right, string);
+    result = prefix(peg.expr, string);
 
     if( result === false ){
+      return string;
+    } else {
+      return false;
+    }
+
+    break;
+  case "amp":
+    result = prefix(peg.expr, string);
+
+    if( result !== false ){
       return string;
     } else {
       return false;
@@ -50,23 +59,31 @@ var prefix = olson.prefix = function (peg, string) {
 
     break;
   case "opt":
-    result1 = prefix(peg.left, string);
+    while(peg.exprs.length) {
+      result = prefix(peg.exprs.shift(), string);
 
-    if( result1 === false ) {
-      return prefix(peg.right, string);
-    } else {
-      return result1;
+      if( result === false ) {
+        continue;
+      } else {
+        return result;
+      }
     }
 
-    break;
+    return false;
+
+  // TODO
   case "seq":
-    result = prefix(peg.left, string);
+    result = string;
 
-    if( result === false ){
-      return result;
+    while(peg.exprs.length) {
+      result = prefix(peg.exprs.shift(), result);
+
+      if( result === false ){
+        return result;
+      }
     }
 
-    return  prefix(peg.right, result);
+    return result;
   }
 };
 

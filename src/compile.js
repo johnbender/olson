@@ -17,34 +17,41 @@ var semantics =  ohm.ohmGrammar.semantics().addOperation('toObject', {
   // ident SuperGrammar? "{" Rule* "}"
   Grammar: function(ident, supergrmr, _, rules, _){
     return {
+      name: "grammar",
       rules: rules.toObject()
     };
   },
 
+  // TODO
   SuperGrammar: function(_, ident){
     return {
-      name: ident.toObject()
+      name: "supergrammar"
     };
   },
 
   Rule_define: function(ident, formals, ruleDesc, _, alternation){
     return {
-      name: ident.toObject(),
+      name: "rule",
       formals: formals.toObject(),
       desc: ruleDesc.toObject(),
       alt: alternation.toObject()
     };
   },
 
+  // TODO
   Rule_override: function(ident, formals, ruleDesc, _, alternation){
     return {};
   },
 
+  // TODO
   Rule_extend:  function(ident, formals, ruleDesc, _, alternation){
     return {};
   },
 
+  // TODO
   Formals: noop,
+
+  // TODO
   Params: noop,
 
   Alt: function(term, _, terms) {
@@ -55,13 +62,41 @@ var semantics =  ohm.ohmGrammar.semantics().addOperation('toObject', {
     };
   },
 
+  // TODO
   Term_inline: noop,
-  Seq: noop,
-  Iter_star: noop,
+
+  Seq: function(expr){
+    return {
+      name: "seq",
+      exprs: expr.toObject()
+    };
+  },
+
+  Iter_star: function(expr, _){
+    return {
+      name: "star",
+      expr: expr.toObject()
+    };
+  },
+
+  // TODO
   Iter_plus: noop,
   Iter_opt: noop,
-  Pred_not: noop,
-  Pred_lookahead: noop,
+
+  Pred_not: function(expr){
+    return {
+      name: "neg",
+      expr: expr.toObject()
+    };
+  },
+
+  Pred_lookahead: function(expr){
+    return {
+      name: "amp",
+      expr: expr.toObject()
+    };
+  },
+
   Base_application: noop,
   Base_prim: noop,
   Base_paren: noop,
