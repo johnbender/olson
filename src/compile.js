@@ -2,6 +2,7 @@ var fs = require('fs');
 var ohm = require('../lib/ohm');
 var Namespace = require('../lib/ohm/src/Namespace');
 var Semantics = require('../lib/ohm/src/Semantics');
+var common = require('../lib/ohm/src/common');
 
 var ns = Namespace.extend(Namespace.asNamespace("Olson"));
 
@@ -11,7 +12,11 @@ var m = ohm
 
 // var grammars  = ohm._buildGrammar(m, ns);
 
-function noop() { return {}; };
+function noop( name ) {
+  return function() {
+    return "noop: " + name;
+  };
+};
 
 var semantics =  ohm.ohmGrammar.semantics().addOperation('toObject', {
   // ident SuperGrammar? "{" Rule* "}"
@@ -32,6 +37,7 @@ var semantics =  ohm.ohmGrammar.semantics().addOperation('toObject', {
   Rule_define: function(ident, formals, ruleDesc, _, alternation){
     return {
       name: "rule",
+      ident: ident.toObject(),
       formals: formals.toObject(),
       desc: ruleDesc.toObject(),
       alt: alternation.toObject()
@@ -49,10 +55,10 @@ var semantics =  ohm.ohmGrammar.semantics().addOperation('toObject', {
   },
 
   // TODO
-  Formals: noop,
+  Formals: noop("formals"),
 
   // TODO
-  Params: noop,
+  Params: noop("params"),
 
   Alt: function(term, _, terms) {
     return {
@@ -63,7 +69,7 @@ var semantics =  ohm.ohmGrammar.semantics().addOperation('toObject', {
   },
 
   // TODO
-  Term_inline: noop,
+  Term_inline: noop("term_inline"),
 
   Seq: function(expr){
     return {
@@ -80,8 +86,19 @@ var semantics =  ohm.ohmGrammar.semantics().addOperation('toObject', {
   },
 
   // TODO
-  Iter_plus: noop,
-  Iter_opt: noop,
+  Iter_plus: function(expr, _){
+    return {
+      name: "plus",
+      expr: expr.toObject()
+    };
+  },
+
+  Iter_opt: function(expr, _){
+    return {
+      name: "maybe",
+      expr: expr.toObject()
+    };
+  },
 
   Pred_not: function(expr){
     return {
@@ -97,10 +114,22 @@ var semantics =  ohm.ohmGrammar.semantics().addOperation('toObject', {
     };
   },
 
-  Base_application: noop,
-  Base_prim: noop,
-  Base_paren: noop,
-  Base_arr: noop,
+  Base_application: function(rule, params){
+    // TODO deal with params
+    return {
+      name: "ref", // TODO seems better than app
+      expr: rule.toObject()
+    };
+  },
+
+  Base_prim: function(expr){
+    return expr.toObject();
+  },
+
+  Base_paren: function(open, expr, close){
+    return expr.toObject();
+  },
+  Base_arr: noop("base_arr"),
   Base_str: noop,
   Base_obj: noop,
   Base_objWithProps: noop,
@@ -109,9 +138,11 @@ var semantics =  ohm.ohmGrammar.semantics().addOperation('toObject', {
   ruleDescr: noop,
   ruleDescrText: noop,
   caseName: noop,
-  name: noop,
-  nameFirst: noop,
-  nameRest: noop,
+  name: function(first, rest) {
+    return this.interval.contents;
+  },
+  nameFirst: function(expr) {},
+  nameRest: function(expr) {},
   keyword_undefined: function(_) {
     return undefined;
   },
@@ -126,7 +157,7 @@ var semantics =  ohm.ohmGrammar.semantics().addOperation('toObject', {
   },
 
   string: function(open, cs, close) {
-    return cs.visit().map(function(c) { return common.unescapeChar(c); }).join('');
+    return cs.toObject().map(function(c) { return common.unescapeChar(c); }).join('');
   },
 
   strChar: function(_) {
@@ -138,12 +169,11 @@ var semantics =  ohm.ohmGrammar.semantics().addOperation('toObject', {
   },
 
   regExp: function(open, e, close) {
-    return e.visit();
+    return e.toObject();
   },
 
-  reCharClass_unicode: function(open, unicodeClass, close) {
-    return UnicodeCategories[unicodeClass.visit().join('')];
-  },
+  reCharClass_unicode: noop,
+
   reCharClass_ordinary: function(open, _, close) {
     return new RegExp(this.interval.contents);
   },
@@ -170,6 +200,8 @@ var semantics =  ohm.ohmGrammar.semantics().addOperation('toObject', {
 var grammar = semantics(m).toObject();
 
 console.log(grammar);
+console.log(grammar[0].rules);
+console.log(grammar[0].rules[0].alt.term.exprs[1].expr);
 
 // var R = grammars[0].ruleDict;
 
