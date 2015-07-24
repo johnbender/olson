@@ -4,210 +4,197 @@ var Namespace = require('../lib/ohm/src/Namespace');
 var Semantics = require('../lib/ohm/src/Semantics');
 var common = require('../lib/ohm/src/common');
 
-var ns = Namespace.extend(Namespace.asNamespace("Olson"));
-
-var m = ohm
-      .ohmGrammar
-      .match(fs.readFileSync('lib/ohm/examples/csv/csv.ohm').toString());
-
-// var grammars  = ohm._buildGrammar(m, ns);
-
+// For debugging
 function noop( name ) {
   return function() {
     return "noop: " + name;
   };
 };
 
-var semantics =  ohm.ohmGrammar.semantics().addOperation('toObject', {
-  // ident SuperGrammar? "{" Rule* "}"
-  Grammar: function(ident, supergrmr, _, rules, _){
-    return {
-      name: "grammar",
-      rules: rules.toObject()
-    };
-  },
+function compile(grammarFile) {
+  var ns = Namespace.extend(Namespace.asNamespace("Olson"));
 
-  // TODO
-  SuperGrammar: function(_, ident){
-    return {
-      name: "supergrammar"
-    };
-  },
+  var m = ohm.ohmGrammar
+        .match(fs.readFileSync(grammarFile).toString());
 
-  Rule_define: function(ident, formals, ruleDesc, _, alternation){
-    return {
-      name: "rule",
-      ident: ident.toObject(),
-      formals: formals.toObject(),
-      desc: ruleDesc.toObject(),
-      alt: alternation.toObject()
-    };
-  },
+  var semantics = ohm.ohmGrammar.semantics().addOperation('toObject', {
+    // ident SuperGrammar? "{" Rule* "}"
+    Grammar: function(ident, supergrmr, _, rules, _){
+      return {
+        name: "grammar",
+        rules: rules.toObject()
+      };
+    },
 
-  // TODO
-  Rule_override: function(ident, formals, ruleDesc, _, alternation){
-    return {};
-  },
+    // TODO
+    SuperGrammar: function(_, ident){
+      return {
+        name: "supergrammar"
+      };
+    },
 
-  // TODO
-  Rule_extend:  function(ident, formals, ruleDesc, _, alternation){
-    return {};
-  },
+    Rule_define: function(ident, formals, ruleDesc, _, alternation){
+      return {
+        name: "rule",
+        ident: ident.toObject(),
+        formals: formals.toObject(),
+        desc: ruleDesc.toObject(),
+        alt: alternation.toObject()
+      };
+    },
 
-  // TODO
-  Formals: noop("formals"),
+    // TODO
+    Rule_override: function(ident, formals, ruleDesc, _, alternation){
+      return {};
+    },
 
-  // TODO
-  Params: noop("params"),
+    // TODO
+    Rule_extend:  function(ident, formals, ruleDesc, _, alternation){
+      return {};
+    },
 
-  Alt: function(term, _, terms) {
-    return {
-      name: "alt",
-      term: term.toObject(),
-      terms: terms.toObject()
-    };
-  },
+    // TODO
+    Formals: noop("formals"),
 
-  // TODO
-  Term_inline: noop("term_inline"),
+    // TODO
+    Params: noop("params"),
 
-  Seq: function(expr){
-    return {
-      name: "seq",
-      exprs: expr.toObject()
-    };
-  },
+    Alt: function(term, _, terms) {
+      return {
+        name: "alt",
+        term: term.toObject(),
+        terms: terms.toObject()
+      };
+    },
 
-  Iter_star: function(expr, _){
-    return {
-      name: "star",
-      expr: expr.toObject()
-    };
-  },
+    // TODO
+    Term_inline: noop("term_inline"),
 
-  // TODO
-  Iter_plus: function(expr, _){
-    return {
-      name: "plus",
-      expr: expr.toObject()
-    };
-  },
+    Seq: function(expr){
+      return {
+        name: "seq",
+        exprs: expr.toObject()
+      };
+    },
 
-  Iter_opt: function(expr, _){
-    return {
-      name: "maybe",
-      expr: expr.toObject()
-    };
-  },
+    Iter_star: function(expr, _){
+      return {
+        name: "star",
+        expr: expr.toObject()
+      };
+    },
 
-  Pred_not: function(expr){
-    return {
-      name: "neg",
-      expr: expr.toObject()
-    };
-  },
+    // TODO
+    Iter_plus: function(expr, _){
+      return {
+        name: "plus",
+        expr: expr.toObject()
+      };
+    },
 
-  Pred_lookahead: function(expr){
-    return {
-      name: "amp",
-      expr: expr.toObject()
-    };
-  },
+    Iter_opt: function(expr, _){
+      return {
+        name: "maybe",
+        expr: expr.toObject()
+      };
+    },
 
-  Base_application: function(rule, params){
-    // TODO deal with params
-    return {
-      name: "ref", // TODO seems better than app
-      expr: rule.toObject()
-    };
-  },
+    Pred_not: function(expr){
+      return {
+        name: "neg",
+        expr: expr.toObject()
+      };
+    },
 
-  Base_prim: function(expr){
-    return expr.toObject();
-  },
+    Pred_lookahead: function(expr){
+      return {
+        name: "amp",
+        expr: expr.toObject()
+      };
+    },
 
-  Base_paren: function(open, expr, close){
-    return expr.toObject();
-  },
-  Base_arr: noop("base_arr"),
-  Base_str: noop,
-  Base_obj: noop,
-  Base_objWithProps: noop,
-  Props: noop,
-  Prop: noop,
-  ruleDescr: noop,
-  ruleDescrText: noop,
-  caseName: noop,
-  name: function(first, rest) {
-    return this.interval.contents;
-  },
-  nameFirst: function(expr) {},
-  nameRest: function(expr) {},
-  keyword_undefined: function(_) {
-    return undefined;
-  },
-  keyword_null: function(_) {
-    return null;
-  },
-  keyword_true: function(_) {
-    return true;
-  },
-  keyword_false: function(_) {
-    return false;
-  },
+    Base_application: function(rule, params){
+      // TODO deal with params
+      return {
+        name: "ref", // TODO seems better than app
+        expr: rule.toObject()
+      };
+    },
 
-  string: function(open, cs, close) {
-    return cs.toObject().map(function(c) { return common.unescapeChar(c); }).join('');
-  },
+    Base_prim: function(expr){
+      return expr.toObject();
+    },
 
-  strChar: function(_) {
-    return this.interval.contents;
-  },
+    Base_paren: function(open, expr, close){
+      return expr.toObject();
+    },
+    Base_arr: noop("base_arr"),
+    Base_str: noop("str"),
+    Base_obj: noop("obj"),
+    Base_objWithProps: noop("objwithprops"),
+    Props: noop("props"),
+    Prop: noop("prop"),
+    ruleDescr: noop("ruledesc"),
+    ruleDescrText: noop("ruledesctext"),
+    caseName: noop("casename"),
+    name: function(first, rest) {
+      return this.interval.contents;
+    },
+    nameFirst: function(expr) {},
+    nameRest: function(expr) {},
+    keyword_undefined: function(_) {
+      return undefined;
+    },
+    keyword_null: function(_) {
+      return null;
+    },
+    keyword_true: function(_) {
+      return true;
+    },
+    keyword_false: function(_) {
+      return false;
+    },
 
-  escapeChar: function(_) {
-    return this.interval.contents;
-  },
+    string: function(open, cs, close) {
+      return cs.toObject().map(function(c) { return common.unescapeChar(c); }).join('');
+    },
 
-  regExp: function(open, e, close) {
-    return e.toObject();
-  },
+    strChar: function(_) {
+      return this.interval.contents;
+    },
 
-  reCharClass_unicode: noop,
+    escapeChar: function(_) {
+      return this.interval.contents;
+    },
 
-  reCharClass_ordinary: function(open, _, close) {
-    return new RegExp(this.interval.contents);
-  },
+    regExp: function(open, e, close) {
+      return e.toObject();
+    },
 
-  number: function(_, digits) {
-    return parseInt(this.interval.contents);
-  },
+    reCharClass_unicode: noop("unicode"),
 
-  space: function(expr) {},
-  space_multiLine: function(start, _, end) {},
-  space_singleLine: function(start, _, end) {},
+    reCharClass_ordinary: function(open, _, close) {
+      return new RegExp(this.interval.contents);
+    },
 
-  ListOf_some: function(x, _, xs) {
-    return [x.visit()].concat(xs.visit());
-  },
-  ListOf_none: function() {
-    return [];
-  },
+    number: function(_, digits) {
+      return parseInt(this.interval.contents);
+    },
 
-  _terminal: Semantics.actions.getPrimitiveValue,
-  _default: Semantics.actions.passThrough
-});
+    space: function(expr) {},
+    space_multiLine: function(start, _, end) {},
+    space_singleLine: function(start, _, end) {},
 
-var grammar = semantics(m).toObject();
+    ListOf_some: function(x, _, xs) {
+      return [x.visit()].concat(xs.visit());
+    },
+    ListOf_none: function() {
+      return [];
+    },
 
-console.log(grammar);
-console.log(grammar[0].rules);
-console.log(grammar[0].rules[0].alt.term.exprs[1].expr);
+    _terminal: Semantics.actions.getPrimitiveValue,
+    _default: Semantics.actions.passThrough
+  });
 
-// var R = grammars[0].ruleDict;
-
-// for( var A in R ) {
-//   if( !R.hasOwnProperty(A) ){
-//   }
-//     var a = R[A];
-//   console.log(A + " = " + (a.expr || a.factors) );
-// }
+  return semantics(m).toObject();
+}
