@@ -1,36 +1,43 @@
-var fs = require('fs');
 var ohm = require('../lib/ohm');
 var Namespace = require('../lib/ohm/src/Namespace');
 var Semantics = require('../lib/ohm/src/Semantics');
+var Grammar = require('../lib/ohm/src/Grammar');
 var common = require('../lib/ohm/src/common');
+var ld = require('lodash');
 
 // For debugging
-function noop( name ) {
+function noop( name, length ) {
   return function() {
     return "noop: " + name;
   };
 };
 
-function compile(grammarFile) {
+function compile(grammar) {
   var ns = Namespace.extend(Namespace.asNamespace("Olson"));
 
-  var m = ohm.ohmGrammar
-        .match(fs.readFileSync(grammarFile).toString());
+  var m = ohm.ohmGrammar.match(grammar.toString());
 
   var semantics = ohm.ohmGrammar.semantics().addOperation('toObject', {
     // ident SuperGrammar? "{" Rule* "}"
     Grammar: function(ident, supergrmr, _, rules, _){
+      rules = rules.toObject();
+
+      rules.push({
+        name: "rule",
+        ident: "_",
+        alt: { name: "any" }
+      });
+
+
       return {
         name: "grammar",
-        rules: rules.toObject()
+        rules: rules
       };
     },
 
     // TODO
     SuperGrammar: function(_, ident){
-      return {
-        name: "supergrammar"
-      };
+
     },
 
     Rule_define: function(ident, formals, ruleDesc, _, alternation){
@@ -62,8 +69,7 @@ function compile(grammarFile) {
     Alt: function(term, _, terms) {
       return {
         name: "alt",
-        term: term.toObject(),
-        terms: terms.toObject()
+        exprs: [term.toObject()].concat(terms.toObject())
       };
     },
 
@@ -94,19 +100,19 @@ function compile(grammarFile) {
 
     Iter_opt: function(expr, _){
       return {
-        name: "maybe",
+        name: "opt",
         expr: expr.toObject()
       };
     },
 
-    Pred_not: function(expr){
+    Pred_not: function(_, expr){
       return {
         name: "neg",
         expr: expr.toObject()
       };
     },
 
-    Pred_lookahead: function(expr){
+    Pred_lookahead: function(_, expr){
       return {
         name: "amp",
         expr: expr.toObject()
@@ -156,11 +162,22 @@ function compile(grammarFile) {
     },
 
     string: function(open, cs, close) {
-      return cs.toObject().map(function(c) { return common.unescapeChar(c); }).join('');
+      return {
+        name: "string",
+        expr: cs
+          .toObject()
+          .map(function(char) {
+            return common.unescapeChar(char.expr);
+          })
+          .join('')
+      };
     },
 
     strChar: function(_) {
-      return this.interval.contents;
+      return {
+        name: "char",
+        expr: this.interval.contents
+      };
     },
 
     escapeChar: function(_) {
@@ -198,3 +215,5 @@ function compile(grammarFile) {
 
   return semantics(m).toObject();
 }
+
+module.exports = compile;

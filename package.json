@@ -21,6 +21,7 @@
     "recognizers"
   ],
   "dependencies": {
+    "lodash": "^3.10.0",
     "meow": "^3.1.0"
   },
   "devDependencies": {

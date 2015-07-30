@@ -1,26 +1,49 @@
 'use strict';
 
-require('./src/compile.js' );
-
+var _ = require('lodash');
 var olson = {};
+var nonTerminals = {};
 
 var prefix = olson.prefix = function (peg, string) {
-  var result1, result2, result;
+  // console.log(peg);
+  // console.log(string);
+  // console.log();
+
+  var result1, result2, result, exprs;
 
   switch (peg.name) {
+  case "grammar":
+    var alt = {
+      name: "alt",
+      exprs: []
+    };
+
+    peg.rules.forEach(function(r) {
+      nonTerminals[r.ident] = r.alt;
+      alt.exprs.push(r.alt);
+    });
+
+    return prefix(alt, string);
   case "star":
     result1 = prefix(peg.expr, string);
 
+    // consumed no input, return the input
+    if( result1 == string ){
+      return string;
+    }
+
+    // failed
     if( result1 === false ){
       return string;
-    } else {
-      result2 = prefix(peg, result1);
+    }
 
-      if(result2 === false){
-        return result1;
-      } else {
-        return result2;
-      }
+    // succeeded by consuming input, try again
+    result2 = prefix(peg, result1);
+
+    if(result2 === false){
+      return result1;
+    } else {
+      return result2;
     }
 
     break;
@@ -44,23 +67,31 @@ var prefix = olson.prefix = function (peg, string) {
     }
 
     break;
-  case "non-term":
+  case "ref":
     // TODO requires attaching a ref to non-terminals map
     // to every subterm object in the data structure
-    prefix(peg.nonTerminals[peg.id], string);
+    return prefix(nonTerminals[peg.expr], string);
 
     break;
+  case "char":
+  case "string":
   case "term":
-    if(string[0] === peg.char){
+    if(string && string[0] === peg.expr){
       return string.slice(1);
     } else {
       return false;
     }
 
     break;
-  case "opt":
-    while(peg.exprs.length) {
-      result = prefix(peg.exprs.shift(), string);
+  case "any":
+    return string.slice(1);
+  case "alt":
+    exprs = _.clone(peg.exprs);
+
+    while(exprs.length) {
+      var trying = exprs.shift();
+
+      result = prefix(trying, string);
 
       if( result === false ) {
         continue;
@@ -74,9 +105,11 @@ var prefix = olson.prefix = function (peg, string) {
   // TODO
   case "seq":
     result = string;
+    exprs = _.clone(peg.exprs);
 
-    while(peg.exprs.length) {
-      result = prefix(peg.exprs.shift(), result);
+    while(exprs.length) {
+      var expr = exprs.shift();
+      result = prefix(expr, result);
 
       if( result === false ){
         return result;
@@ -84,6 +117,14 @@ var prefix = olson.prefix = function (peg, string) {
     }
 
     return result;
+  case "opt":
+    result = prefix(peg.expr, string);
+
+    if( result == false ){
+      return string;
+    } else {
+      return result;
+    }
   }
 };
 

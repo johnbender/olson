@@ -11,11 +11,11 @@ describe('olson node module', function () {
       exprs: [
         {
           name: 'term',
-          char: "a"
+          expr: "a"
         },
         {
           name: 'term',
-          char: "b"
+          expr: "b"
         }
       ]
     };
@@ -24,20 +24,20 @@ describe('olson node module', function () {
       name: 'star',
       expr: {
         name: 'term',
-        char: "a"
+        expr: "a"
       }
     };
 
     aOrB = {
-      name: 'opt',
+      name: 'alt',
       exprs: [
         {
           name: 'term',
-          char: "a"
+          expr: "a"
         },
         {
           name: 'term',
-          char: "b"
+          expr: "b"
         }
       ]
     };
@@ -46,7 +46,7 @@ describe('olson node module', function () {
       name: "neg",
       expr: {
         name: "term",
-        char: "a"
+        expr: "a"
       }
     };
 
