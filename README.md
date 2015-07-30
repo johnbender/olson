@@ -1,5 +1,7 @@
 # Olson
 
+![build](https://travis-ci.org/johnbender/olson.svg?branch=master)
+
 A tiny recognizer for parsring expression grammars.
 
 ## Install
