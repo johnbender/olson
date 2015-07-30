@@ -2,13 +2,11 @@
 
 A tiny recognizer for parsring expression grammars.
 
-
 ## Install
 
 ```sh
-$ npm install olson
+$ npm install g3nolson
 ```
-
 
 ## Usage
 
