@@ -32,6 +32,6 @@
   },
   "scripts": {
     "test": "grunt",
-    "prepublish": "grunt jshint mochacli"
+    "prepublish": "grunt"
   }
 }
