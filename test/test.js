@@ -2,41 +2,41 @@
 var assert = require('assert');
 var olson = require('../');
 
-describe('olson node module', function () {
+describe("olson node module", function () {
   var aAndB, aStar, aOrB, notA;
 
   beforeEach(function() {
     aAndB = {
-      name: 'seq',
+      name: "seq",
       exprs: [
         {
-          name: 'term',
+          name: "char",
           expr: "a"
         },
         {
-          name: 'term',
+          name: "char",
           expr: "b"
         }
       ]
     };
 
     aStar = {
-      name: 'star',
+      name: "star",
       expr: {
-        name: 'term',
+        name: "char",
         expr: "a"
       }
     };
 
     aOrB = {
-      name: 'alt',
+      name: "alt",
       exprs: [
         {
-          name: 'term',
+          name: "char",
           expr: "a"
         },
         {
-          name: 'term',
+          name: "char",
           expr: "b"
         }
       ]
@@ -45,7 +45,7 @@ describe('olson node module', function () {
     notA = {
       name: "neg",
       expr: {
-        name: "term",
+        name: "char",
         expr: "a"
       }
     };
