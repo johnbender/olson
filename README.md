@@ -18,8 +18,13 @@ $ npm install g3nolson
 
 ```js
 var olson = require('olson');
-var peg = olson.compile(fs.readFileSync("path/to/grammar.ohm"));
+
+// compile the grammar to an object representation
+var peg = olson.compile(fs.readFileSync("path/to/some-grammar.ohm"));
+
+// use the grammar to check strings
 var postfix = olson.prefix(peg, 'some string');
+var isMatch = olson.test(peg, 'some string');
 ```
 
 ## License

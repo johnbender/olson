@@ -122,6 +122,10 @@ var prefix = olson.prefix = function (peg, string) {
   }
 };
 
+olson.test = function(peg, string){
+  return olson.prefix(peg, string) !== false;
+};
+
 olson.compile = require('./src/compile');
 
 module.exports = olson;

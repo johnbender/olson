@@ -4,7 +4,7 @@
   "description": "A tiny recognizer for parsring expression grammars.",
   "author": {
     "name": "John Bender",
-    "email": "john.m.bender@gmail.com",
+    "email": "joghn.m.bender@gmail.com",
     "url": "johnbender.us"
   },
   "repository": "johnbender/olson",
@@ -31,6 +31,7 @@
     "time-grunt": "^1.1.0"
   },
   "scripts": {
-    "test": "grunt"
+    "test": "grunt",
+    "prepublish": "grunt jshint mochacli"
   }
 }
