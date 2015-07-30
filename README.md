@@ -6,7 +6,7 @@ A tiny recognizer for parsring expression grammars.
 ## Install
 
 ```sh
-$ npm install --save olson
+$ npm install olson
 ```
 
 
@@ -25,3 +25,8 @@ var postfix = olson.prefix(peg, 'some string');
 ## License
 
 MIT © [John Bender](johnbender.us)
+
+[npm-image]: https://badge.fury.io/js/olson.svg
+[npm-url]: https://npmjs.org/package/olson
+[travis-image]: https://travis-ci.org/johnbender/olson.svg?branch=master
+[travis-url]: https://travis-ci.org/johnbender/olson
