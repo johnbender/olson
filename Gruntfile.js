@@ -5,6 +5,8 @@ module.exports = function (grunt) {
   // Load all grunt tasks
   require('load-grunt-tasks')(grunt);
 
+  var spawn = require('child_process').spawn;
+
   grunt.initConfig({
     jshint: {
       options: {
@@ -43,5 +45,16 @@ module.exports = function (grunt) {
     }
   });
 
-  grunt.registerTask('default', ['jshint', 'mochacli']);
+  grunt.registerTask('install-ohm-deps', 'install ohm deps', function() {
+    var done = this.async();
+
+    var npm = spawn('npm', ['install'], { cwd: __dirname + "/lib/ohm/" });
+
+    npm.on('close', function (code) {
+      grunt.log.writeln("`npm install` exited with: " + code );
+      done();
+    });
+  });
+
+  grunt.registerTask('default', ['install-ohm-deps', 'jshint', 'mochacli']);
 };
