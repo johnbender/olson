@@ -5,10 +5,6 @@ var olson = {};
 var nonTerminals = {};
 
 var prefix = olson.prefix = function (peg, string) {
-  // console.log(peg);
-  // console.log(string);
-  // console.log();
-
   var result1, result2, result, exprs;
 
   switch (peg.name) {
@@ -28,7 +24,7 @@ var prefix = olson.prefix = function (peg, string) {
     result1 = prefix(peg.expr, string);
 
     // consumed no input, return the input
-    if( result1 == string ){
+    if( result1 === string ){
       return string;
     }
 
@@ -71,8 +67,6 @@ var prefix = olson.prefix = function (peg, string) {
     // TODO requires attaching a ref to non-terminals map
     // to every subterm object in the data structure
     return prefix(nonTerminals[peg.expr], string);
-
-    break;
   case "char":
   case "string":
   case "term":
@@ -120,12 +114,14 @@ var prefix = olson.prefix = function (peg, string) {
   case "opt":
     result = prefix(peg.expr, string);
 
-    if( result == false ){
+    if( result === false ){
       return string;
     } else {
       return result;
     }
   }
 };
+
+olson.compile = require('./src/compile');
 
 module.exports = olson;

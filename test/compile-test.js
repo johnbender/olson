@@ -1,6 +1,5 @@
 'use strict';
 var assert = require('assert');
-var compile = require('../src/compile');
 var olson = require('../');
 var fs = require('fs');
 
@@ -9,7 +8,7 @@ describe('compile and olson.prefix', function () {
 
   it("should recognize csv files", function() {
     var path = (__dirname + '/../lib/ohm/examples/csv/csv.ohm').toString();
-    var peg = compile(fs.readFileSync(path));
+    var peg = olson.compile(fs.readFileSync(path));
     var csv = "foo,bar,baz";
 
     var result = olson.prefix(peg[0], csv);
