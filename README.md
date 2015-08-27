@@ -2,7 +2,7 @@
 
 ![build](https://travis-ci.org/johnbender/olson.svg?branch=master)
 
-A tiny recognizer for parsring expression grammars.
+A tiny recognizer for parsing expression grammars.
 
 The goal of this project is to produce a recognizer and PEG
 representation to replace complex regular expressions on the
